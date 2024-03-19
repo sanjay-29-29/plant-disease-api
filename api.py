@@ -12,11 +12,6 @@ from PIL import Image
 
 app = FastAPI()
 
-origins = [
-    "http://localhost:5173",
-    "http://localhost:tbd", 
-]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  
@@ -27,7 +22,7 @@ app.add_middleware(
 
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True) 
 model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_remote_code=True, device_map='auto') 
-
+history = None
 ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
 listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
 
@@ -58,7 +53,7 @@ async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
     {'image': 'image.jpg'},
     {'text': query},
     ])
-    response, history = model.chat(tokenizer, query=query, history=None)
+    response, history = model.chat(tokenizer, query=query, history=history)
     return {"response": response}
 
 @app.post("/text_query")
@@ -66,5 +61,5 @@ async def plant_image(query: str = Body(...)):
     global history
     query = extract_text_from_multipart(query)
     print(query)
-    response, history = model.chat(tokenizer, query, history=None)
+    response, history = model.chat(tokenizer, query, history=history)
     return {"response": response}
