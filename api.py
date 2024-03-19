@@ -4,6 +4,7 @@ import uvicorn
 import os
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
+from aiohttp import web
 import threading
 import re
 from pyngrok import ngrok
@@ -41,6 +42,7 @@ def extract_text_from_multipart(query: str):
 
 @app.post("/text_query")
 async def plant_image(query: str = Body(...)):
+    query = extract_text_from_multipart(query)
     print(query)
     global count
     if count == 0:
