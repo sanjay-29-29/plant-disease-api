@@ -20,11 +20,9 @@ app.add_middleware(
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True) 
 model = AutoModelForCausalLM.from_pretrained("KissanAI/Dhenu-vision-lora-0.1", trust_remote_code=True, device_map='auto') 
 
-def run_server():
-    ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
-    tunnel = ngrok.connect(8000)
-    print(f"Public URL: {tunnel.public_url}")
-    uvicorn.run("api:app", host="127.0.0.1", port=8000)
+ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
+tunnel = ngrok.connect(8000)
+print(f"Public URL: {tunnel.public_url}")
 
 @app.get("/text_query")
 async def plant_image(query: str = Query(...)):
@@ -35,6 +33,3 @@ async def plant_image(query: str = Query(...)):
         response, history = model.chat(tokenizer, query, history=history)
         count += 1
     return {"response": response}
-
-if __name__ == "__main__":
-    threading.Thread(target=run_server).start()
