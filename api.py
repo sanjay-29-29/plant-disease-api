@@ -9,9 +9,6 @@ from pyngrok import ngrok
 
 app = FastAPI()
 
-tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True)
-model = AutoModelForCausalLM.from_pretrained("KissanAI/Dhenu-vision-lora-0.1", trust_remote_code=True, device_map='auto')
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],  
@@ -37,4 +34,6 @@ async def plant_image(query: str = Query(...)):
     return {"response": response}
 
 if __name__ == "__main__":
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True)
+    model = AutoModelForCausalLM.from_pretrained("KissanAI/Dhenu-vision-lora-0.1", trust_remote_code=True, device_map='auto')
     threading.Thread(target=run_server).start()
