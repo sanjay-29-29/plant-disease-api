@@ -2,12 +2,13 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import time
 import uvicorn
 import os
-from fastapi import FastAPI, Body
+from fastapi import FastAPI, Body, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from aiohttp import web
+import io
 import threading
 import re
 from pyngrok import ngrok
+from PIL import Image
 
 app = FastAPI()
 
@@ -30,7 +31,6 @@ model = AutoModelForCausalLM.from_pretrained("KissanAI/Dhenu-vision-lora-0.1", t
 ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
 tunnel = ngrok.connect(8000)
 print(f"Public URL: {tunnel.public_url}")
-count = 0
 
 def extract_text_from_multipart(query: str):
     pattern = r'------WebKitFormBoundary.*\r\nContent-Disposition: form-data; name="query"\r\n\r\n(.*)\r\n------WebKitFormBoundary'  # Adjusted pattern
@@ -39,16 +39,32 @@ def extract_text_from_multipart(query: str):
         return match.group(1).strip()
     else:
         raise ValueError("Could not find query text within multipart data")
+    
+
+@app.post("/image_query")
+async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
+    image_content = await image.read()
+    try:
+        with Image.open(io.BytesIO(image_content)) as img:
+            img = img.convert("RGB")
+            img.save("image.jpg")
+    except Exception as e:
+        print(e)
+        return {"error": "Error in image processing"}
+    
+    text = extract_text_from_multipart(query)
+
+    query = tokenizer.from_list_format([
+    {'image': 'image.jpg'},
+    {'text': text},
+    ])
+
+    response, history = model.chat(tokenizer, query=query, history=None)
+    return {"response": response}
 
 @app.post("/text_query")
 async def plant_image(query: str = Body(...)):
     query = extract_text_from_multipart(query)
     print(query)
-    global count
-    if count == 0:
-        response, history = model.chat(tokenizer, query, history=None)
-    else:
-        response, history = model.chat(tokenizer, query, history=None)
-    count += 1
-    
+    response, history = model.chat(tokenizer, query, history=None)
     return {"response": response}
