@@ -17,6 +17,9 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
+tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True) 
+model = AutoModelForCausalLM.from_pretrained("KissanAI/Dhenu-vision-lora-0.1", trust_remote_code=True, device_map='auto') 
+
 def run_server():
     ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
     tunnel = ngrok.connect(8000)
@@ -34,6 +37,4 @@ async def plant_image(query: str = Query(...)):
     return {"response": response}
 
 if __name__ == "__main__":
-    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True)
-    model = AutoModelForCausalLM.from_pretrained("KissanAI/Dhenu-vision-lora-0.1", trust_remote_code=True, device_map='auto')
     threading.Thread(target=run_server).start()
