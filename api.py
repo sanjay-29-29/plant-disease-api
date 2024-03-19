@@ -52,15 +52,17 @@ async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
         print(e)
         return {"error": "Error in image processing"}
     
-    text = extract_text_from_multipart(query)
+    #text = extract_text_from_multipart(query)
 
-    query = tokenizer.from_list_format([
+    print(query)
+
+    '''query = tokenizer.from_list_format([
     {'image': 'image.jpg'},
     {'text': text},
     ])
 
     response, history = model.chat(tokenizer, query=query, history=None)
-    return {"response": response}
+    return {"response": response}'''
 
 @app.post("/text_query")
 async def plant_image(query: str = Body(...)):
