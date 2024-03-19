@@ -23,10 +23,10 @@ model = AutoModelForCausalLM.from_pretrained("KissanAI/Dhenu-vision-lora-0.1", t
 ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
 tunnel = ngrok.connect(8000)
 print(f"Public URL: {tunnel.public_url}")
+count = 0
 
-@app.get("/text_query")
+@app.post("/text_query")
 async def plant_image(query: str = Query(...)):
-    count = 0
     if count == 0:
         response, history = model.chat(tokenizer, query, history=None)
     else:
