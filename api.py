@@ -2,7 +2,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import time
 import uvicorn
 import os
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 import threading
 from pyngrok import ngrok
@@ -26,7 +26,8 @@ print(f"Public URL: {tunnel.public_url}")
 count = 0
 
 @app.post("/text_query")
-async def plant_image(query: str = Query(...)):
+async def plant_image(query: str = Body(...)):
+    global count
     if count == 0:
         response, history = model.chat(tokenizer, query, history=None)
     else:
