@@ -43,4 +43,5 @@ async def plant_image(query: str = Body(...)):
     else:
         response, history = model.chat(tokenizer, query, history=history)
     count += 1
-    print(query)
+    
+    return {"response": response}
