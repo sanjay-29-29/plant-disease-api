@@ -42,6 +42,7 @@ def extract_text_from_multipart(query: str):
 
 @app.post("/image_query")
 async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
+    global history
     image_content = await image.read()
     try:
         with Image.open(io.BytesIO(image_content)) as img:
@@ -62,6 +63,7 @@ async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
 
 @app.post("/text_query")
 async def plant_image(query: str = Body(...)):
+    global history
     query = extract_text_from_multipart(query)
     print(query)
     response, history = model.chat(tokenizer, query, history=history)
