@@ -31,13 +31,13 @@ tunnel = ngrok.connect(8000)
 print(f"Public URL: {tunnel.public_url}")
 count = 0
 
-''''def extract_text_from_multipart(query: str):
-    pattern = r'Content-Disposition: form-data; name="query"\r\n\r\n(.*)\r\n----------------------------'
+def extract_text_from_multipart(query: str):
+    pattern = r'------WebKitFormBoundary.*\r\nContent-Disposition: form-data; name="query"\r\n\r\n(.*)\r\n------WebKitFormBoundary'  # Adjusted pattern
     match = re.search(pattern, query)
     if match:
         return match.group(1).strip()
     else:
-        raise ValueError("Could not find query text within multipart data")'''
+        raise ValueError("Could not find query text within multipart data")
 
 @app.post("/text_query")
 async def plant_image(query: str = Body(...)):
