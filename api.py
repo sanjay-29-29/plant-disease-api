@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import io
 import threading
 import re
-from pyngrok import ngrok
+import ngrok
 from PIL import Image
 
 app = FastAPI()
@@ -29,8 +29,9 @@ tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code
 model = AutoModelForCausalLM.from_pretrained("KissanAI/Dhenu-vision-lora-0.1", trust_remote_code=True, device_map='auto') 
 
 ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
-tunnel = ngrok.connect(8000)
-print(f"Public URL: {tunnel.public_url}")
+listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
+uvicorn.run("api:app", host="127.0.0.1", port=8000)
+
 
 def extract_text_from_multipart(query: str):
     pattern = r'------WebKitFormBoundary.*\r\nContent-Disposition: form-data; name="query"\r\n\r\n(.*)\r\n------WebKitFormBoundary'  # Adjusted pattern
