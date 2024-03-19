@@ -46,7 +46,7 @@ async def plant_image(query: str = Body(...)):
     if count == 0:
         response, history = model.chat(tokenizer, query, history=None)
     else:
-        response, history = model.chat(tokenizer, query, history=history)
+        response, history = model.chat(tokenizer, query, history=None)
     count += 1
     
     return {"response": response}
