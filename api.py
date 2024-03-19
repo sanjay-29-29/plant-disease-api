@@ -19,8 +19,10 @@ app.add_middleware(
 
 def run_server():
     ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
-    listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True)
-    print(f"Public URL: {listener.public_url}")
+    ngrok.forward("127.0.0.1:8000", authtoken_from_env=True)
+    tunnels = ngrok.get_tunnels()
+    for tunnel in tunnels:
+        print(f"Public URL: {tunnel.public_url}")
     uvicorn.run("api:app", host="127.0.0.1", port=8000)
 
 @app.get("/text_query")
