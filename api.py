@@ -22,15 +22,10 @@ def run_server():
     listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
     uvicorn.run("api:app", host="127.0.0.1", port=8000)
 
-def create_model():
-    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True)
-    model = AutoModelForCausalLM.from_pretrained("KissanAI/Dhenu-vision-lora-0.1", trust_remote_code=True, device_map='auto')
-    return model, tokenizer
-
-model, tokenizer = create_model()
-
 @app.get("/text_query")
 async def plant_image(query: str = Query(...)):
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True)
+    model = AutoModelForCausalLM.from_pretrained("KissanAI/Dhenu-vision-lora-0.1", trust_remote_code=True, device_map='auto')
     response, history = model.chat(tokenizer, query, history=history)
     return {"response": response}
 
