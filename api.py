@@ -5,6 +5,7 @@ import os
 from fastapi import FastAPI, Body
 from fastapi.middleware.cors import CORSMiddleware
 import threading
+import re
 from pyngrok import ngrok
 
 app = FastAPI()
@@ -25,12 +26,21 @@ tunnel = ngrok.connect(8000)
 print(f"Public URL: {tunnel.public_url}")
 count = 0
 
+def extract_text_from_multipart(query: str):
+    pattern = r'Content-Disposition: form-data; name="query"\r\n\r\n(.*)\r\n----------------------------'
+    match = re.search(pattern, query)
+    if match:
+        return match.group(1).strip()
+    else:
+        raise ValueError("Could not find query text within multipart data")
+
 @app.post("/text_query")
 async def plant_image(query: str = Body(...)):
+    query = extract_text_from_multipart(query)
     global count
     if count == 0:
         response, history = model.chat(tokenizer, query, history=None)
     else:
         response, history = model.chat(tokenizer, query, history=history)
-        count += 1
-    return {"response": response}
+    count += 1
+    print(query)
