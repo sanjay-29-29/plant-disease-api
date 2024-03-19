@@ -30,7 +30,7 @@ model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_remot
 
 ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
 listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
-history=None
+
 def extract_text_from_multipart(query: str):
     pattern = r'------WebKitFormBoundary.*\r\nContent-Disposition: form-data; name="query"\r\n\r\n(.*)\r\n------WebKitFormBoundary'  # Adjusted pattern
     match = re.search(pattern, query)
@@ -58,7 +58,7 @@ async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
     {'image': 'image.jpg'},
     {'text': query},
     ])
-    response, history = model.chat(tokenizer, query=query, history=history)
+    response, history = model.chat(tokenizer, query=query, history=None)
     return {"response": response}
 
 @app.post("/text_query")
@@ -66,5 +66,5 @@ async def plant_image(query: str = Body(...)):
     global history
     query = extract_text_from_multipart(query)
     print(query)
-    response, history = model.chat(tokenizer, query, history=history)
+    response, history = model.chat(tokenizer, query, history=None)
     return {"response": response}
