@@ -1,15 +1,20 @@
 # Description: This file contains the code for the FastAPI server which serves as the backend for the plant disease detection and chatbot application.
+# keywords = ['agriculture', 'plants', 'crop', 'farm', 'soil', 'fertilizer', 'pesticide', 'harvest', 'seed', 'irrigation']
+
 import torch
 import io
 import re
 import ngrok
 from PIL import Image
 import torch.nn as nn
+import threading
+from threading import Event
 import torch.nn.functional as F
 from torchvision import transforms
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from fastapi import FastAPI, Body, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+import uvicorn
 
 torch.seed()
 
@@ -22,6 +27,21 @@ app.add_middleware(
     allow_methods=["*"], 
     allow_headers=["*"], 
 )
+
+resnet_model = None
+llm_model = None
+history = None
+tokenizer = None
+
+def run_server():
+    global resnet_model, llm_model, history, tokenizer
+    ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
+    listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True) 
+    llm_model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_remote_code=True, device_map='auto')
+    ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
+    resnet_model = create_model_resnet()
+    uvicorn.run("api:app", host="127.0.0.1", port=8000)
 
 def ConvBlock(in_channels, out_channels, pool=False):
     layers = [nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
@@ -62,7 +82,6 @@ def create_model_resnet():
     return model    
     
 def predict_image(model, image_path):
-
     diseases = ['Apple scab',
     'Apple Black rot',
     'Apple Cedar_apple rust',
@@ -116,17 +135,6 @@ def predict_image(model, image_path):
     
     return class_max_prob
     
-
-
-tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True) 
-llm_model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_remote_code=True, device_map='auto')
-resnet_model = create_model_resnet()
-history = None
-ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
-listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
-
-keywords = ['agriculture', 'plants', 'crop', 'farm', 'soil', 'fertilizer', 'pesticide', 'harvest', 'seed', 'irrigation']
-
 def extract_text_from_multipart(query: str):
     pattern = r'------WebKitFormBoundary.*\r\nContent-Disposition: form-data; name="query"\r\n\r\n(.*)\r\n------WebKitFormBoundary'
     match = re.search(pattern, query)
@@ -137,7 +145,7 @@ def extract_text_from_multipart(query: str):
 
 @app.post("/image_query")
 async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
-    global history
+    global history, resnet_model, llm_model, tokenizer
     image_content = await image.read()
     try:
         with Image.open(io.BytesIO(image_content)) as img:
@@ -160,9 +168,12 @@ async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
 
 @app.post("/text_query")
 async def plant_image(query: str = Body(...)):
-    global history
+    global history, llm_model, tokenizer
     query = extract_text_from_multipart(query)
     print(query)
     response, history = llm_model.chat(tokenizer, query, history=history)
     history = history[-3:]
     return {"response": response}
+
+if __name__ == "__main__":
+    threading.Thread(target=run_server).start()
