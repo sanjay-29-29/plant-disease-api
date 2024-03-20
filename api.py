@@ -4,6 +4,9 @@ import io
 import re
 import ngrok
 from PIL import Image
+import torch.nn as nn
+import torch.nn.functional as F
+from torchvision import transforms
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from fastapi import FastAPI, Body, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
