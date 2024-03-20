@@ -5,7 +5,7 @@ import re
 import ngrok
 from PIL import Image
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from restnet import ResNet9, predict_image
+from resnet import ResNet9, predict_image
 from fastapi import FastAPI, Body, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
