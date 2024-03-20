@@ -1,5 +1,6 @@
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import time
+import utils
 import uvicorn
 import os
 from fastapi import FastAPI, Body, UploadFile, File
@@ -37,7 +38,7 @@ def extract_text_from_multipart(query: str):
 
 @app.post("/image_query")
 async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
-    global history
+    global history, resnet_model, llm_model, tokenizer
     image_content = await image.read()
     try:
         with Image.open(io.BytesIO(image_content)) as img:
@@ -47,19 +48,22 @@ async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
         print(e)
         return {"error": "Error in image processing"}
     
-    print(query)
-
-    query = tokenizer.from_list_format([
-    {'image': 'image.jpg'},
-    {'text': query},
-    ])
-    response, history = model.chat(tokenizer, query=query, history=history)
-    return {"response": response}
+    query = extract_text_from_multipart(query)
+    op_text = utils.predict_image("image.jpg")
+    op_text = op_text.lower()
+    if('healthy' in op_text):
+        response = "The plant is healthy"
+    else:
+        query = 'give me prevention and fertilizers to use for' + op_text + 'in a detailed manner'
+        response, history = llm_model.chat(tokenizer, query=query, history=history)
+        history = history[-3:]
+        return {"response": response}
 
 @app.post("/text_query")
 async def plant_image(query: str = Body(...)):
-    global history
+    global history, llm_model, tokenizer
     query = extract_text_from_multipart(query)
     print(query)
-    response, history = model.chat(tokenizer, query, history=history)
+    response, history = llm_model.chat(tokenizer, query, history=history)
+    history = history[-3:]
     return {"response": response}
