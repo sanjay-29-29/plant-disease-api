@@ -38,7 +38,7 @@ class ResNet9(nn.Module):
         return out
 
 def create_model_resnet():
-    model = ResNet(3,38)
+    model = ResNet9(3,38)
     model = torch.load('plant-disease-model-complete.pth', map_location=torch.device('cpu'))
     return model    
     
