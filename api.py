@@ -22,10 +22,13 @@ app.add_middleware(
 )
 
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True) 
-model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_remote_code=True, device_map='auto') 
+llm_model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_remote_code=True, device_map='auto') 
 history = None
-ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
-listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
+
+def run_server():
+    ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
+    listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
+    uvicorn.run("api:app", host="127.0.0.1", port=8000)
 
 def extract_text_from_multipart(query: str):
     pattern = r'------WebKitFormBoundary.*\r\nContent-Disposition: form-data; name="query"\r\n\r\n(.*)\r\n------WebKitFormBoundary'  # Adjusted pattern
@@ -67,3 +70,7 @@ async def plant_image(query: str = Body(...)):
     response, history = llm_model.chat(tokenizer, query, history=history)
     history = history[-3:]
     return {"response": response}
+
+if __name__ == "__main__":
+    resnet_model = utils.load_model_weights(utils.ResNet9(3,38), 'plant-disease-model-complete.pth')
+    threading.Thread(target=run_server).start()

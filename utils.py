@@ -41,7 +41,12 @@ model = ResNet9(3, 38)
 model.load_state_dict(torch.load('plant-disease-model-complete.pth', map_location=torch.device('cpu')))
 model.eval()
 
-def predict_image(image_path):
+def load_model_weights(model, weights_path):
+    model.load_state_dict(torch.load(weights_path, map_location=torch.device('cpu')))
+    model.eval()
+    return model
+
+def predict_image(model, image_path):
     diseases = ['Apple scab',
     'Apple Black rot',
     'Apple Cedar_apple rust',
