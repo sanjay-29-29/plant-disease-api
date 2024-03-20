@@ -38,7 +38,8 @@ class ResNet9(nn.Module):
         return out
 
 model = ResNet9(3, 3)
-model.load_state_dict("plant-disease-model-complete.pth")
+model.load_state_dict(torch.load('plant-disease-model-complete.pth', map_location=torch.device('cpu')))
+model.eval()
 
 def predict_image(image_path):
     diseases = ['Apple scab',
