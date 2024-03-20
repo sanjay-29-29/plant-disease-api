@@ -20,13 +20,10 @@ torch.seed()
 
 app = FastAPI()
 
-@app.on_event("startup")
-def load_model():
-    global resnet_model, llm_model, history, tokenizer
-    resnet_model = create_model_resnet()
-    llm_model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_remote_code=True, device_map='auto')
-    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True)
-    history = None
+resnet_model = None
+llm_model = None
+history = None
+tokenizer = None
 
 app.add_middleware(
     CORSMiddleware,
@@ -36,15 +33,12 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
-resnet_model = None
-llm_model = None
-history = None
-tokenizer = None
-
-def run_server():
-    ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
-    listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
-    uvicorn.run("api:app", host="127.0.0.1", port=8000)
+@app.on_event("startup")
+def load_model():
+    global llm_model, history, tokenizer
+    llm_model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_remote_code=True, device_map='auto')
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True)
+    history = None
 
 def ConvBlock(in_channels, out_channels, pool=False):
     layers = [nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
@@ -179,4 +173,8 @@ async def plant_image(query: str = Body(...)):
     return {"response": response}
 
 if __name__ == "__main__":
-    threading.Thread(target=run_server).start()
+    global resnet_model
+    resnet_model = create_model_resnet()
+    ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
+    listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
+    uvicorn.run("api:app", host="127.0.0.1", port=8000)
