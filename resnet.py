@@ -35,13 +35,13 @@ class ResNet9(nn.Module):
         out = self.conv4(out)
         out = self.res2(out) + out
         out = self.classifier(out)
-        return out   
-    
-model = ResNet9(3, 38)
-print(type(model))
-model = torch.load('plant-disease-model-complete.pth', map_location=torch.device('cpu'))
-model.eval()
+        return out
 
+def create_model_resnet():
+    model = ResNet(3,38)
+    model = torch.load('plant-disease-model-complete.pth', map_location=torch.device('cpu'))
+    return model    
+    
 def predict_image(model, image_path):
 
     diseases = ['Apple scab',

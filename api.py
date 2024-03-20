@@ -5,11 +5,11 @@ import re
 import ngrok
 from PIL import Image
 from transformers import AutoModelForCausalLM, AutoTokenizer
-from resnet import ResNet9, predict_image
+from resnet import predict_image, create_model_resnet
 from fastapi import FastAPI, Body, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
-torch.seed(-1)
+torch.seed()
 
 app = FastAPI()
 
@@ -23,8 +23,7 @@ app.add_middleware(
 
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True) 
 llm_model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_remote_code=True, device_map='auto')
-resnet_model = ResNet9(3, 38)
-resnet_model = torch.load('plant-disease-model-complete.pth', map_location=torch.device('cpu')) 
+resnet_model = create_model_resnet()
 history = None
 ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
 listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
