@@ -36,6 +36,8 @@ class ResNet9(nn.Module):
         out = self.res2(out) + out
         out = self.classifier(out)
         return out
+import __main__
+setattr(__main__, "Net", ResNet9())
 
 model = ResNet9(3, 3)
 model.load_state_dict(torch.load('plant-disease-model-complete.pth', map_location=torch.device('cpu')))
