@@ -168,7 +168,7 @@ if __name__ == "__main__":
     ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
     public_url = ngrok.connect(8000)
     print("Tracking URL:", public_url)
-    uvicorn.run("main:app", host="127.0.0.1", port=8000)
+    uvicorn.run("api:app", host="127.0.0.1", port=8000)
     #ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
     #listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
     #uvicorn.run("api:app", host="127.0.0.1", port=8000)
