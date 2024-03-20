@@ -38,7 +38,7 @@ class ResNet9(nn.Module):
         return out
 
 model = ResNet9(3, 3)
-model.load_state_dict("model.pth")
+model.load_state_dict("plant-disease-model-complete.pth")
 
 def predict_image(image_path):
     diseases = ['Apple scab',
