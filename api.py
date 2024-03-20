@@ -20,7 +20,6 @@ torch.seed()
 
 app = FastAPI()
 
-resnet_model = None
 llm_model = None
 history = None
 tokenizer = None
@@ -173,7 +172,6 @@ async def plant_image(query: str = Body(...)):
     return {"response": response}
 
 if __name__ == "__main__":
-    global resnet_model
     resnet_model = create_model_resnet()
     ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
     listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
