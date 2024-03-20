@@ -19,14 +19,6 @@ torch.manual_seed(-1)
 app = Flask(__name__)
 CORS(app) 
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  
-    allow_credentials=True, 
-    allow_methods=["*"], 
-    allow_headers=["*"], 
-)
-
 history = None
 llm_model = None
 tokenizer = None
