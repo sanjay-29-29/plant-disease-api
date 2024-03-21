@@ -149,7 +149,7 @@ def extract_text_from_multipart(query: str):
         raise ValueError("Could not find query text within multipart data")
     
 @app.post("/image_query")
-async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
+async def plant_image(image: UploadFile = File(...)):
     global history, alexnet_model, llm_model, tokenizer
     image_content = await image.read()
     try:
