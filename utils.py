@@ -48,7 +48,7 @@ def load_model_alexnet():
     classifier.add(BatchNormalization())
     classifier.add(Dense(units = 38, activation = 'softmax'))
 
-    classifier.load_weights('AlexNetModel.hdf5')
+    classifier.load_weights('/kaggle/input/alexnet/tensorflow2/v1.0/1/AlexNetModel.hdf5')
 
     return classifier
 
