@@ -1,3 +1,4 @@
+import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import time
 import utils
@@ -10,6 +11,14 @@ import threading
 import re
 import ngrok
 from PIL import Image
+original_cuda_visible_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+import tensorflow as tf
+
+if original_cuda_visible_devices is not None:
+    os.environ['CUDA_VISIBLE_DEVICES'] = original_cuda_visible_devices
+else:
+    del os.environ['CUDA_VISIBLE_DEVICES']
 
 app = FastAPI()
 
