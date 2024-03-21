@@ -71,43 +71,44 @@ def load_model_alexnet():
     return classifier
 
 def predict_image(model, image_path):
-    diseases = ['Apple scab',
-    'Apple Black rot',
-    'Apple Cedar_apple rust',
-    'Apple healthy',
-    'Blueberry healthy',
-    'Cherry Powdery_mildew',
-    'Cherry healthy',
-    'Maize Cercospora leaf spot',
-    'Maize Common rust',
+
+    diseases = ['Apple Scab',
+    'Apple Black Rot',
+    'Apple Cedar Apple Rust',
+    'Apple Healthy',
+    'Blueberry Healthy',
+    'Cherry Powdery Mildew',
+    'Cherry Healthy',
+    'Maize Cercospora Leaf Spot',
+    'Maize Common Rust',
     'Maize Northern Leaf Blight',
-    'Maize healthy',
-    'Grape Black rot',
+    'Maize Healthy',
+    'Grape Black Rot',
     'Grape Esca Black Measles',
-    'Grape Leaf blight Isariopsis Leaf Spot',
-    'Grape healthy',
-    'Orange Haunglongbing Citrus greening',
-    'Peach Bacterial_spot',
-    'Peach healthy',
-    'Pepper bell Bacterial spot',
-    'Pepper bell healthy',
-    'Potato Early blight',
-    'Potato Late_blight',
-    'Potato healthy',
-    'Raspberry healthy',
-    'Soybean healthy',
-    'Squash Powdery mildew',
-    'Strawberry Leaf scorch',
-    'Strawberry healthy',
-    'Tomato Bacterial spot',
-    'Tomato Early blight',
+    'Grape Leaf Blight Isariopsis Leaf Spot',
+    'Grape Healthy',
+    'Orange Haunglongbing Citrus Greening',
+    'Peach Bacterial Spot',
+    'Peach Healthy',
+    'Pepper Bell Bacterial Spot',
+    'Pepper Bell Healthy',
+    'Potato Early Blight',
+    'Potato Late Blight',
+    'Potato Healthy',
+    'Raspberry Healthy',
+    'Soybean Healthy',
+    'Squash Powdery Mildew',
+    'Strawberry Leaf Scorch',
+    'Strawberry Healthy',
+    'Tomato Bacterial Spot',
+    'Tomato Early Blight',
     'Tomato Leaf Mold',
-    'Tomato Septoria leaf spot',
-    'Tomato Spider mites Two-spotted spider mite',
-    'Tomato Target_Spot',
-    'Tomato_Yellow Leaf Curl Virus',
-    'Tomato mosaic virus',
-    'Tomato healthy'
+    'Tomato Septoria Leaf Spot',
+    'Tomato Spider Mites Two-Spotted Spider Mite',
+    'Tomato Target Spot',
+    'Tomato Yellow Leaf Curl Virus',
+    'Tomato Mosaic Virus',
+    'Tomato Healthy'
     ]
     img = Image.open(image_path)
     img = img.resize((224, 224))
@@ -164,12 +165,13 @@ async def plant_image(image: UploadFile = File(...)):
     op_text = predict_image(alexnet_model, "image.jpg")
     op_text = op_text.lower()
     if('healthy' in op_text):
-        return {'response': "The plant is healthy"}
+        return {'response': "The plant is healthy. If you have any other queries, feel free to ask."}
     else:
         query = 'give me prevention and fertilizers to use for' + op_text + 'in a detailed manner'
         response, history = llm_model.chat(tokenizer, query=query, history=history)
         history = history[-3:]
-        response = 'The plant is suffering from ' + op_text + '. ' + response 
+        response = 'The plant is suffering from ' + op_text + '. ' + response
+        print(response) 
         return {"response": response}
 
 @app.post("/text_query")
@@ -179,4 +181,5 @@ async def plant_image(query: str = Body(...)):
     print(query)
     response, history = llm_model.chat(tokenizer, query, history=history)
     history = history[-3:]
+    print(response)
     return {"response": response}
