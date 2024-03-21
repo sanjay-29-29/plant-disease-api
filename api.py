@@ -26,6 +26,7 @@ from PIL import Image
 physical_devices = tf.config.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
 tf.config.experimental.set_memory_growth(physical_devices[1], True)
+
 def load_model_alexnet():
 
     classifier = Sequential()
@@ -148,10 +149,9 @@ def extract_text_from_multipart(query: str):
     else:
         raise ValueError("Could not find query text within multipart data")
     
-
 @app.post("/image_query")
 async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
-    global history, resnet_model, llm_model, tokenizer
+    global history, alexnet_model, llm_model, tokenizer
     image_content = await image.read()
     try:
         with Image.open(io.BytesIO(image_content)) as img:
