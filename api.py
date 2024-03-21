@@ -164,7 +164,7 @@ async def plant_image(image: UploadFile = File(...)):
     op_text = predict_image(alexnet_model, "image.jpg")
     op_text = op_text.lower()
     if('healthy' in op_text):
-        response = "The plant is healthy"
+        return {'response': "The plant is healthy"}
     else:
         query = 'give me prevention and fertilizers to use for' + op_text + 'in a detailed manner'
         response, history = llm_model.chat(tokenizer, query=query, history=history)
