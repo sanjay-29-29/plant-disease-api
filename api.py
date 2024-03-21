@@ -21,6 +21,7 @@ app.add_middleware(
     allow_headers=["*"], 
 )
 
+alexnet_model = utils.load_model_alexnet()
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True) 
 llm_model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_remote_code=True, device_map='auto') 
 history = None
@@ -52,7 +53,7 @@ async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
         return {"error": "Error in image processing"}
     
     query = extract_text_from_multipart(query)
-    op_text = utils.predict_image("image.jpg")
+    op_text = utils.predict_image(alexnet_model, "image.jpg")
     op_text = op_text.lower()
     if('healthy' in op_text):
         response = "The plant is healthy"

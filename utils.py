@@ -1,50 +1,56 @@
-import torch
-import torch.nn.functional as F
-from torchvision import transforms
-import torch.nn as nn
 from PIL import Image
+import tensorflow as tf
+import numpy as np
+from keras.models import Sequential
+from keras.layers import Convolution2D
+from keras.layers import MaxPooling2D
+from keras.layers import Flatten
+from keras.layers import Dense
+from keras.layers import Dropout
+from keras.layers import BatchNormalization
 
-def ConvBlock(in_channels, out_channels, pool=False):
-    layers = [nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
-             nn.BatchNorm2d(out_channels),
-             nn.ReLU(inplace=True)]
-    if pool:
-        layers.append(nn.MaxPool2d(4))
-    return nn.Sequential(*layers)
+def load_model_alexnet():
 
-class ResNet9(nn.Module):
-    def __init__(self, in_channels, num_diseases):
-        super().__init__()
-        self.conv1 = ConvBlock(in_channels, 64)
-        self.conv2 = ConvBlock(64, 128, pool=True) 
-        self.res1 = nn.Sequential(ConvBlock(128, 128), ConvBlock(128, 128))
-        
-        self.conv3 = ConvBlock(128, 256, pool=True) 
-        self.conv4 = ConvBlock(256, 512, pool=True) 
-        self.res2 = nn.Sequential(ConvBlock(512, 512), ConvBlock(512, 512))
-        
-        self.classifier = nn.Sequential(nn.MaxPool2d(4),
-                                       nn.Flatten(),
-                                       nn.Linear(512, num_diseases))
-        
-    def forward(self, xb): 
-        out = self.conv1(xb)
-        out = self.conv2(out)
-        out = self.res1(out) + out
-        out = self.conv3(out)
-        out = self.conv4(out)
-        out = self.res2(out) + out
-        out = self.classifier(out)
-        return out
+    classifier = Sequential()
 
-model = ResNet9(3, 38)
-model.load_state_dict(torch.load('plant-disease-model-complete.pth', map_location=torch.device('cpu')))
-model.eval()
+    classifier.add(Convolution2D(96, 11, strides = (4, 4), padding = 'valid', input_shape=(224, 224, 3), activation = 'relu'))
 
-def load_model_weights(model, weights_path):
-    model.load_state_dict(torch.load(weights_path, map_location=torch.device('cpu')))
-    model.eval()
-    return model
+    classifier.add(MaxPooling2D(pool_size = (2, 2), strides = (2, 2), padding = 'valid'))
+    classifier.add(BatchNormalization())
+
+    classifier.add(Convolution2D(256, 11, strides = (1, 1), padding='valid', activation = 'relu'))
+
+    classifier.add(MaxPooling2D(pool_size = (2, 2), strides = (2, 2), padding='valid'))
+    classifier.add(BatchNormalization())
+
+    # Convolution Step 3
+    classifier.add(Convolution2D(384, 3, strides = (1, 1), padding='valid', activation = 'relu'))
+    classifier.add(BatchNormalization())
+
+    classifier.add(Convolution2D(384, 3, strides = (1, 1), padding='valid', activation = 'relu'))
+    classifier.add(BatchNormalization())
+
+    classifier.add(Convolution2D(256, 3, strides=(1,1), padding='valid', activation = 'relu'))
+
+    classifier.add(MaxPooling2D(pool_size = (2, 2), strides = (2, 2), padding = 'valid'))
+    classifier.add(BatchNormalization())
+
+    classifier.add(Flatten())
+
+    classifier.add(Dense(units = 4096, activation = 'relu'))
+    classifier.add(Dropout(0.4))
+    classifier.add(BatchNormalization())
+    classifier.add(Dense(units = 4096, activation = 'relu'))
+    classifier.add(Dropout(0.4))
+    classifier.add(BatchNormalization())
+    classifier.add(Dense(units = 1000, activation = 'relu'))
+    classifier.add(Dropout(0.2))
+    classifier.add(BatchNormalization())
+    classifier.add(Dense(units = 38, activation = 'softmax'))
+
+    classifier.load_weights('AlexNetModel.hdf5')
+
+    return classifier
 
 def predict_image(model, image_path):
     diseases = ['Apple scab',
@@ -77,7 +83,6 @@ def predict_image(model, image_path):
     'Strawberry healthy',
     'Tomato Bacterial spot',
     'Tomato Early blight',
-    'Tomato Late blight',
     'Tomato Leaf Mold',
     'Tomato Septoria leaf spot',
     'Tomato Spider mites Two-spotted spider mite',
@@ -86,13 +91,13 @@ def predict_image(model, image_path):
     'Tomato mosaic virus',
     'Tomato healthy'
     ]
-
     img = Image.open(image_path)
-    img = transforms.ToTensor()(img)
-    img = img.unsqueeze(0)
-    pred = model(img)
-    pred = F.softmax(pred, dim=1)
-    pred = pred.detach().numpy()
+    img = img.resize((224, 224))
+    img = np.array(img)
+    img = img / 255.0
+    img = np.expand_dims(img, axis=0)
+    pred = model.predict(img)
+    pred = tf.nn.softmax(pred, axis=1).numpy()
     pred = pred[0]
     pred = pred.tolist()
     pred = {diseases[i]: pred[i] for i in range(len(diseases))}
