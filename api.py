@@ -160,7 +160,7 @@ async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
         print(e)
         return {"error": "Error in image processing"}
     
-    query = extract_text_from_multipart(query)
+    #query = extract_text_from_multipart(query)
     op_text = predict_image(alexnet_model, "image.jpg")
     op_text = op_text.lower()
     if('healthy' in op_text):
@@ -169,6 +169,7 @@ async def plant_image(query: str = Body(...), image: UploadFile = File(...)):
         query = 'give me prevention and fertilizers to use for' + op_text + 'in a detailed manner'
         response, history = llm_model.chat(tokenizer, query=query, history=history)
         history = history[-3:]
+        response = 'The plant is suffering from ' + op_text + '. ' + response 
         return {"response": response}
 
 @app.post("/text_query")
