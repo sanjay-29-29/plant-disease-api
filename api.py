@@ -1,12 +1,6 @@
 import os
 
-# Save the original CUDA_VISIBLE_DEVICES
-original_cuda_visible_devices = os.environ.get('CUDA_VISIBLE_DEVICES')
 
-# Set CUDA_VISIBLE_DEVICES to -1
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-
-# Import TensorFlow
 import tensorflow as tf
 from keras.models import Sequential
 from keras.layers import Convolution2D
@@ -15,11 +9,6 @@ from keras.layers import Flatten
 from keras.layers import Dense
 from keras.layers import Dropout
 from keras.layers import BatchNormalization
-# Reset CUDA_VISIBLE_DEVICES to its original value
-if original_cuda_visible_devices is not None:
-    os.environ['CUDA_VISIBLE_DEVICES'] = original_cuda_visible_devices
-else:
-    del os.environ['CUDA_VISIBLE_DEVICES']
 
 import torch
 import numpy as np
@@ -34,6 +23,8 @@ import re
 import ngrok
 from PIL import Image
 
+physical_devices = tf.config.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
 
 def load_model_alexnet():
 
@@ -145,11 +136,9 @@ alexnet_model = load_model_alexnet()
 tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen-VL-Chat", trust_remote_code=True) 
 llm_model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_remote_code=True, device_map='auto') 
 history = None
-
-def run_server():
-    ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
-    listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
-    uvicorn.run("api:app", host="127.0.0.1", port=8000)
+ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
+listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
+uvicorn.run("api:app", host="127.0.0.1", port=8000)
 
 def extract_text_from_multipart(query: str):
     pattern = r'------WebKitFormBoundary.*\r\nContent-Disposition: form-data; name="query"\r\n\r\n(.*)\r\n------WebKitFormBoundary'  # Adjusted pattern
@@ -191,6 +180,3 @@ async def plant_image(query: str = Body(...)):
     response, history = llm_model.chat(tokenizer, query, history=history)
     history = history[-3:]
     return {"response": response}
-
-if __name__ == "__main__":
-    threading.Thread(target=run_server).start()
