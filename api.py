@@ -111,6 +111,7 @@ async def plant_image(image: UploadFile = File(...)):
 async def plant_image(query: str = Body(...)):
     global history, llm_model, tokenizer, translate
     query = extract_text_from_multipart(query)
+    detected = translator.detect(query)
     if detected.lang == 'ta':
         query = translator.translate(query, dest='en').text
     print(query)
