@@ -72,7 +72,7 @@ async def plant_image(image: UploadFile = File(...)):
         response, history = llm_model.chat(tokenizer, query=query, history=history)
         history = history[-3:]
         response = 'The plant is suffering from ' + op_text + '. ' + response
-        response = string(translate(response))
+        response = str(translate(response))
         print(response) 
         return {"response": response}
 
@@ -83,6 +83,6 @@ async def plant_image(query: str = Body(...)):
     print(query)
     response, history = llm_model.chat(tokenizer, query, history=history)
     history = history[-3:]
-    response = string(translate(response))
+    response = str(translate(response))
     print(response)
     return {"response": response}
