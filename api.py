@@ -12,7 +12,7 @@ import re
 import ngrok
 from PIL import Image
 import utils
-from google.cloud import translate_v2 as google_translate
+from googletrans import Translator
 
 app = FastAPI()
 
@@ -30,17 +30,12 @@ llm_model = AutoModelForCausalLM.from_pretrained("sanjay-29-29/GreenAI", trust_r
 history = None
 ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
 listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
-
-def translate_text(text, target='ta'):
-    translate_client = google_translate.Client()
-
-    result = translate_client.translate(text, target_language=target)
-
-    return result['input'], result['translatedText']
+translator = Translator()
 
 def translate(text):
-    input_text, translated_text = translate_text(text)
-    return translated_text
+    global translator
+    tamil_text = translator.translate(text, src='en', dest='ta').text
+    return tamil_text
 
 def extract_text_from_multipart(query: str):
     pattern = r'------WebKitFormBoundary.*\r\nContent-Disposition: form-data; name="query"\r\n\r\n(.*)\r\n------WebKitFormBoundary'  # Adjusted pattern
