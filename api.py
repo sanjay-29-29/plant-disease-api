@@ -12,7 +12,7 @@ import re
 import ngrok
 from PIL import Image
 import utils
-from google.cloud import translate_v2 as translate
+from google.cloud import translate_v2 as google_translate
 
 app = FastAPI()
 
@@ -32,7 +32,7 @@ ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
 listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
 
 def translate_text(text, target='ta'):
-    translate_client = translate.Client()
+    translate_client = google_translate.Client()
 
     result = translate_client.translate(text, target_language=target)
 
