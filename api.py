@@ -97,9 +97,6 @@ async def plant_image(image: UploadFile = File(...)):
     op_text = op_text.lower()
     if('healthy' in op_text):
         return {'response': "கொடுக்கப்பட்ட இலை ஆரோக்கியமானது. உங்களுக்கு வேறு ஏதேனும் கேள்விகள் இருந்தால், தயங்காமல் கேளுங்கள்...."}
-        
-    detected = translator.detect(query)
-    
     else:
         query = 'give me prevention and fertilizers to use for' + op_text + 'in a detailed manner'
         response, history = llm_model.chat(tokenizer, query=query, history=history)
