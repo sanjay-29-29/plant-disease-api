@@ -6,6 +6,7 @@ from keras.layers import Flatten
 from keras.layers import Dense
 from keras.layers import Dropout
 from keras.layers import BatchNormalization
+from PIL import Image
 
 physical_devices = tf.config.list_physical_devices('GPU')
 tf.config.experimental.set_memory_growth(physical_devices[0], True)
