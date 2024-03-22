@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 from keras.models import Sequential
 from keras.layers import Convolution2D
