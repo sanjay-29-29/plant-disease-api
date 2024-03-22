@@ -44,8 +44,43 @@ def extract_text_from_multipart(query: str):
         return match.group(1).strip()
     else:
         raise ValueError("Could not find query text within multipart data")
+
+@app.post("/english_image_query")
+async def plant_image(image: UploadFile = File(...)):
+    global history, alexnet_model, llm_model, tokenizer
+    image_content = await image.read()
+    try:
+        with Image.open(io.BytesIO(image_content)) as img:
+            img = img.convert("RGB")
+            img.save("image.jpg")
+    except Exception as e:
+        print(e)
+        return {"error": "Error in image processing"}
     
-@app.post("/image_query")
+    #query = extract_text_from_multipart(query)
+    op_text = utils.predict_image(alexnet_model, "image.jpg")
+    op_text = op_text.lower()
+    if('healthy' in op_text):
+        return {'response': "The plant is healthy. If you have any other queries, feel free to ask."}
+    else:
+        query = 'give me prevention and fertilizers to use for' + op_text + 'in a detailed manner'
+        response, history = llm_model.chat(tokenizer, query=query, history=history)
+        history = history[-3:]
+        response = 'The plant is suffering from ' + op_text + '. ' + response
+        print(response) 
+        return {"response": response}
+
+@app.post("/english_text_query")
+async def plant_image(query: str = Body(...)):
+    global history, llm_model, tokenizer
+    query = extract_text_from_multipart(query)
+    print(query)
+    response, history = llm_model.chat(tokenizer, query, history=history)
+    history = history[-3:]
+    print(response)
+    return {"response": response}
+    
+@app.post("/tamil_image_query")
 async def plant_image(image: UploadFile = File(...)):
     global history, alexnet_model, llm_model, tokenizer
     image_content = await image.read()
@@ -71,7 +106,7 @@ async def plant_image(image: UploadFile = File(...)):
         print(response) 
         return {"response": response}
 
-@app.post("/text_query")
+@app.post("/tamil_text_query")
 async def plant_image(query: str = Body(...)):
     global history, llm_model, tokenizer
     query = extract_text_from_multipart(query)
