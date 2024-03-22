@@ -32,11 +32,6 @@ ngrok.set_auth_token("2dVBJw5G2bExzQ41keUUDtC0U8K_7zn55apnGM8YJ3RNsfznb")
 listener = ngrok.forward("127.0.0.1:8000", authtoken_from_env=True, domain="glowing-polite-porpoise.ngrok-free.app")
 translator = Translator()
 
-def translate(text):
-    global translator
-    tamil_text = translator.translate(text, src='en', dest='ta').text
-    return tamil_text
-
 def extract_text_from_multipart(query: str):
     pattern = r'------WebKitFormBoundary.*\r\nContent-Disposition: form-data; name="query"\r\n\r\n(.*)\r\n------WebKitFormBoundary'  # Adjusted pattern
     match = re.search(pattern, query)
@@ -44,6 +39,16 @@ def extract_text_from_multipart(query: str):
         return match.group(1).strip()
     else:
         raise ValueError("Could not find query text within multipart data")
+
+def tamil_translate(text):
+    global translator
+    tamil_text = translator.translate(text, src='en', dest='ta').text
+    return tamil_text
+
+def english_translate(text):
+    global translator
+    tamil_text = translator.translate(text, src='en', dest='ta').text
+    return tamil_text
 
 @app.post("/english_image_query")
 async def plant_image(image: UploadFile = File(...)):
@@ -102,7 +107,7 @@ async def plant_image(image: UploadFile = File(...)):
         response, history = llm_model.chat(tokenizer, query=query, history=history)
         history = history[-3:]
         response = 'The plant is suffering from ' + op_text + '. ' + response
-        response = str(translate(response))
+        response = str(tamil_translate(response))
         print(response) 
         return {"response": response}
 
@@ -113,6 +118,6 @@ async def plant_image(query: str = Body(...)):
     print(query)
     response, history = llm_model.chat(tokenizer, query, history=history)
     history = history[-3:]
-    response = str(translate(response))
+    response = str(tamil_translate(response))
     print(response)
     return {"response": response}
