@@ -45,11 +45,6 @@ def tamil_translate(text):
     tamil_text = translator.translate(text, src='en', dest='ta').text
     return tamil_text
 
-def english_translate(text):
-    global translator
-    tamil_text = translator.translate(text, src='en', dest='ta').text
-    return tamil_text
-
 @app.post("/english_image_query")
 async def plant_image(image: UploadFile = File(...)):
     global history, alexnet_model, llm_model, tokenizer
@@ -100,6 +95,7 @@ async def plant_image(image: UploadFile = File(...)):
     #query = extract_text_from_multipart(query)
     op_text = utils.predict_image(alexnet_model, "image.jpg")
     op_text = op_text.lower()
+    detected = translator.detect(query)
     if('healthy' in op_text):
         return {'response': "The plant is healthy. If you have any other queries, feel free to ask."}
     else:
@@ -113,8 +109,10 @@ async def plant_image(image: UploadFile = File(...)):
 
 @app.post("/tamil_text_query")
 async def plant_image(query: str = Body(...)):
-    global history, llm_model, tokenizer
+    global history, llm_model, tokenizer, translate
     query = extract_text_from_multipart(query)
+    if detected.lang == 'ta':
+        query = translator.translate(query, dest='en').text
     print(query)
     response, history = llm_model.chat(tokenizer, query, history=history)
     history = history[-3:]
